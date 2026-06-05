@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Finanzas">
+<meta name="theme-color" content="#ffffff">
+<title>Finanzas Personal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f6f3;
+    --surface: #ffffff;
+    --surface2: #f0ede8;
+    --text: #1a1a18;
+    --text2: #6b6860;
+    --text3: #9e9c98;
+    --border: rgba(0,0,0,0.08);
+    --border2: rgba(0,0,0,0.14);
+    --accent: #1a1a18;
+    --green: #1a7a4a;
+    --green-bg: #e8f5ee;
+    --red: #c0392b;
+    --red-bg: #fde8e6;
+    --blue: #1a5fa8;
+    --blue-bg: #e6eef8;
+    --amber: #a06000;
+    --amber-bg: #fdf3e0;
+    --radius: 14px;
+    --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #111110;
+      --surface: #1c1c1a;
+      --surface2: #252523;
+      --text: #f0ede8;
+      --text2: #a8a49e;
+      --text3: #6b6860;
+      --border: rgba(255,255,255,0.08);
+      --border2: rgba(255,255,255,0.14);
+      --accent: #f0ede8;
+      --green: #4ade80;
+      --green-bg: #0d2e1a;
+      --red: #f87171;
+      --red-bg: #2e0d0d;
+      --blue: #60a5fa;
+      --blue-bg: #0d1e30;
+      --amber: #fbbf24;
+      --amber-bg: #2e1e00;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; background: var(--bg); font-family: 'DM Sans', sans-serif; color: var(--text); }
+  body { display: flex; flex-direction: column; max-width: 480px; margin: 0 auto; }
+
+  /* Header */
+  .header { padding: 52px 20px 12px; background: var(--surface); border-bottom: 1px solid var(--border); }
+  .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+  .app-name { font-size: 13px; font-weight: 500; color: var(--text2); letter-spacing: 0.06em; text-transform: uppercase; }
+  .sync-btn { background: none; border: 1px solid var(--border2); color: var(--text2); font-size: 12px; padding: 5px 10px; border-radius: 20px; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 5px; }
+  .sync-btn:active { background: var(--surface2); }
+  .sync-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+  .sync-dot.err { background: var(--red); }
+  .sync-dot.loading { background: var(--amber); animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* Nav tabs */
+  .nav { display: flex; background: var(--surface); padding: 0 16px 12px; gap: 4px; }
+  .nav-tab { flex: 1; padding: 8px 4px; border: none; background: none; color: var(--text3); font-size: 11px; font-family: inherit; font-weight: 500; cursor: pointer; border-radius: var(--radius-sm); display: flex; flex-direction: column; align-items: center; gap: 3px; transition: all 0.15s; }
+  .nav-tab svg { width: 20px; height: 20px; stroke: currentColor; stroke-width: 1.8; fill: none; }
+  .nav-tab.active { color: var(--text); background: var(--surface2); }
+
+  /* Content */
+  .content { flex: 1; overflow-y: auto; padding: 16px; padding-bottom: 24px; }
+
+  /* Cards */
+  .card { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); padding: 16px; margin-bottom: 12px; }
+  .card-sm { padding: 12px 14px; }
+
+  /* Metrics */
+  .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  .metric { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); padding: 14px; }
+  .metric-label { font-size: 11px; color: var(--text3); margin-bottom: 4px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; }
+  .metric-value { font-size: 22px; font-weight: 300; color: var(--text); font-family: 'DM Mono', monospace; }
+  .metric-value.red { color: var(--red); }
+  .metric-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+  /* TDC cards */
+  .tdc-card { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); margin-bottom: 12px; overflow: hidden; }
+  .tdc-header { padding: 14px 16px 10px; display: flex; justify-content: space-between; align-items: flex-start; }
+  .tdc-dot { width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; flex-shrink: 0; margin-top: 3px; }
+  .tdc-name { font-size: 15px; font-weight: 500; display: flex; align-items: flex-start; }
+  .tdc-dates-row { font-size: 11px; color: var(--text3); padding: 0 16px 10px; }
+  .tdc-balances { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .tdc-bal-box { background: var(--surface2); padding: 10px 14px; }
+  .tdc-bal-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 3px; }
+  .tdc-bal-val { font-size: 18px; font-weight: 400; font-family: 'DM Mono', monospace; }
+  .tdc-bal-val.red { color: var(--red); }
+  .tdc-footer { padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; }
+  .progress { height: 3px; background: var(--border2); border-radius: 2px; flex: 1; margin-right: 12px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 2px; transition: width 0.4s ease; }
+
+  /* Badge */
+  .badge { font-size: 10px; font-weight: 500; padding: 3px 8px; border-radius: 20px; white-space: nowrap; letter-spacing: 0.03em; }
+  .badge-green { background: var(--green-bg); color: var(--green); }
+  .badge-amber { background: var(--amber-bg); color: var(--amber); }
+  .badge-red { background: var(--red-bg); color: var(--red); }
+  .badge-blue { background: var(--blue-bg); color: var(--blue); }
+
+  /* Transactions */
+  .tx-item { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--border); }
+  .tx-item:last-child { border-bottom: none; }
+  .tx-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; }
+  .tx-icon.out { background: var(--red-bg); }
+  .tx-icon.in  { background: var(--green-bg); }
+  .tx-info { flex: 1; min-width: 0; }
+  .tx-desc { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tx-meta { font-size: 11px; color: var(--text3); margin-top: 1px; }
+  .tx-right { text-align: right; flex-shrink: 0; }
+  .tx-amount { font-size: 14px; font-weight: 500; font-family: 'DM Mono', monospace; }
+  .tx-amount.neg { color: var(--red); }
+  .tx-amount.pos { color: var(--green); }
+  .del-btn { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 16px; padding: 4px; margin-top: 2px; }
+
+  /* Form */
+  .form-group { margin-bottom: 14px; }
+  .form-label { font-size: 12px; color: var(--text2); font-weight: 500; margin-bottom: 5px; display: block; text-transform: uppercase; letter-spacing: 0.04em; }
+  .form-input, .form-select { width: 100%; padding: 11px 14px; border: 1px solid var(--border2); border-radius: var(--radius-sm); background: var(--surface2); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 15px; outline: none; transition: border-color 0.15s; -webkit-appearance: none; }
+  .form-input:focus, .form-select:focus { border-color: var(--accent); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .btn-primary { width: 100%; padding: 14px; background: var(--accent); color: var(--bg); border: none; border-radius: var(--radius-sm); font-family: inherit; font-size: 15px; font-weight: 500; cursor: pointer; transition: opacity 0.15s; }
+  .btn-primary:active { opacity: 0.8; }
+  .btn-secondary { padding: 10px 16px; background: var(--surface2); color: var(--text); border: 1px solid var(--border2); border-radius: var(--radius-sm); font-family: inherit; font-size: 14px; cursor: pointer; }
+  .btn-danger-sm { background: var(--red-bg); color: var(--red); border: none; border-radius: var(--radius-sm); font-family: inherit; font-size: 13px; padding: 6px 10px; cursor: pointer; }
+
+  /* Toggle */
+  .type-toggle { display: grid; grid-template-columns: 1fr 1fr; background: var(--surface2); border-radius: var(--radius-sm); padding: 3px; margin-bottom: 16px; gap: 3px; }
+  .type-btn { padding: 9px; text-align: center; border: none; background: none; color: var(--text3); font-family: inherit; font-size: 14px; font-weight: 500; border-radius: 6px; cursor: pointer; transition: all 0.15s; }
+  .type-btn.active { background: var(--surface); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+
+  /* Modal */
+  .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; z-index: 100; align-items: flex-end; justify-content: center; }
+  .modal-bg.open { display: flex; }
+  .modal { background: var(--surface); border-radius: var(--radius) var(--radius) 0 0; padding: 20px; width: 100%; max-width: 480px; max-height: 85vh; overflow-y: auto; }
+  .modal-handle { width: 36px; height: 4px; background: var(--border2); border-radius: 2px; margin: 0 auto 20px; }
+  .modal-title { font-size: 17px; font-weight: 500; margin-bottom: 16px; }
+
+  /* Section title */
+  .sec-title { font-size: 12px; font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; }
+
+  /* Color picker */
+  .color-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .color-swatch { width: 28px; height: 28px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: border-color 0.15s; }
+  .color-swatch.selected { border-color: var(--text); }
+
+  /* Setup screen */
+  .setup-screen { padding: 32px 20px; text-align: center; }
+  .setup-icon { font-size: 48px; margin-bottom: 16px; }
+  .setup-title { font-size: 22px; font-weight: 500; margin-bottom: 8px; }
+  .setup-desc { font-size: 14px; color: var(--text2); line-height: 1.6; margin-bottom: 24px; }
+  .setup-input-group { text-align: left; margin-bottom: 16px; }
+
+  /* Empty */
+  .empty { text-align: center; padding: 32px 16px; color: var(--text3); font-size: 14px; }
+
+  /* Filter bar */
+  .filter-bar { display: flex; gap: 8px; margin-bottom: 12px; overflow-x: auto; padding-bottom: 2px; }
+  .filter-bar::-webkit-scrollbar { display: none; }
+  .filter-chip { padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border2); background: var(--surface); color: var(--text2); font-size: 12px; white-space: nowrap; cursor: pointer; font-family: inherit; transition: all 0.15s; }
+  .filter-chip.active { background: var(--accent); color: var(--bg); border-color: transparent; }
+
+  .section { display: none; }
+  .section.active { display: block; }
+  .pay-btn { font-size: 12px; background: var(--amber-bg); color: var(--amber); border: none; border-radius: 20px; padding: 4px 10px; cursor: pointer; font-family: inherit; font-weight: 500; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <span class="app-name">Finanzas</span>
+    <button class="sync-btn" onclick="syncData()" id="sync-btn">
+      <span class="sync-dot" id="sync-dot"></span>
+      <span id="sync-label">Sincronizado</span>
+    </button>
+  </div>
+</div>
+
+<nav class="nav">
+  <button class="nav-tab active" onclick="showTab('dashboard',0)" id="tab0">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    Inicio
+  </button>
+  <button class="nav-tab" onclick="showTab('transactions',1)" id="tab1">
+    <svg viewBox="0 0 24 24"><path d="M8 6l4-4 4 4M16 18l-4 4-4-4M12 2v20"/></svg>
+    Movimientos
+  </button>
+  <button class="nav-tab" onclick="showTab('add',2)" id="tab2">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>
+    Agregar
+  </button>
+  <button class="nav-tab" onclick="showTab('cards',3)" id="tab3">
+    <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+    Tarjetas
+  </button>
+</nav>
+
+<div class="content">
+
+  <!-- DASHBOARD -->
+  <div class="section active" id="section-dashboard">
+    <div class="metrics-grid" id="dash-metrics"></div>
+    <div class="sec-title">Tarjetas de crédito</div>
+    <div id="tdc-cards-dash"></div>
+    <div class="sec-title">Últimos movimientos</div>
+    <div class="card card-sm" id="dash-recent"></div>
+  </div>
+
+  <!-- TRANSACTIONS -->
+  <div class="section" id="section-transactions">
+    <div class="filter-bar" id="filter-bar"></div>
+    <div class="card card-sm" id="tx-list"></div>
+  </div>
+
+  <!-- ADD -->
+  <div class="section" id="section-add">
+    <div class="type-toggle">
+      <button class="type-btn active" id="type-expense" onclick="setType('expense')">💸 Gasto</button>
+      <button class="type-btn" id="type-income" onclick="setType('income')">💰 Ingreso</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Descripción</label>
+      <input class="form-input" id="f-desc" type="text" placeholder="Súper, Netflix, salario...">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Monto ($)</label>
+        <input class="form-input" id="f-amount" type="number" inputmode="decimal" placeholder="0.00" min="0" step="0.01">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Fecha</label>
+        <input class="form-input" id="f-date" type="date">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Cuenta</label>
+      <select class="form-select" id="f-account"></select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Categoría</label>
+      <select class="form-select" id="f-category">
+        <option value="alimentacion">🛒 Alimentación</option>
+        <option value="restaurantes">🍽️ Restaurantes</option>
+        <option value="transporte">🚗 Transporte</option>
+        <option value="entretenimiento">🎬 Entretenimiento</option>
+        <option value="salud">🏥 Salud</option>
+        <option value="ropa">👔 Ropa</option>
+        <option value="servicios">💡 Servicios</option>
+        <option value="educacion">📚 Educación</option>
+        <option value="viajes">✈️ Viajes</option>
+        <option value="salario">💼 Salario</option>
+        <option value="freelance">💻 Freelance</option>
+        <option value="otro">📦 Otro</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notas (opcional)</label>
+      <input class="form-input" id="f-notes" type="text" placeholder="Nota adicional...">
+    </div>
+    <button class="btn-primary" onclick="addTx()">Guardar movimiento</button>
+  </div>
+
+  <!-- CARDS -->
+  <div class="section" id="section-cards">
+    <div id="cards-list"></div>
+    <button class="btn-secondary" onclick="openCardModal()" style="width:100%">+ Agregar tarjeta</button>
+  </div>
+
+</div>
+
+<!-- MODAL TARJETA -->
+<div class="modal-bg" id="card-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Nueva tarjeta de crédito</div>
+    <div class="form-group">
+      <label class="form-label">Nombre</label>
+      <input class="form-input" id="nc-name" type="text" placeholder="TDC Banamex, HSBC...">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Día de corte</label>
+        <input class="form-input" id="nc-cut" type="number" min="1" max="31" value="1" inputmode="numeric">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Día de pago</label>
+        <input class="form-input" id="nc-pay" type="number" min="1" max="31" value="21" inputmode="numeric">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Límite de crédito ($)</label>
+      <input class="form-input" id="nc-limit" type="number" inputmode="decimal" placeholder="0.00">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Color</label>
+      <div class="color-row" id="color-picker"></div>
+      <input type="hidden" id="nc-color" value="#378ADD">
+    </div>
+    <div style="display:flex;gap:10px;margin-top:4px">
+      <button class="btn-secondary" onclick="closeCardModal()" style="flex:1">Cancelar</button>
+      <button class="btn-primary" onclick="saveCard()" style="flex:2">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- SETUP MODAL -->
+<div class="modal-bg" id="setup-modal" style="align-items:center">
+  <div class="modal" style="border-radius:var(--radius);max-width:400px;margin:20px">
+    <div style="text-align:center;margin-bottom:20px">
+      <div style="font-size:40px;margin-bottom:8px">🔗</div>
+      <div style="font-size:18px;font-weight:500;margin-bottom:6px">Conectar con Google Sheets</div>
+      <div style="font-size:13px;color:var(--text2);line-height:1.6">Pega la URL de tu Google Apps Script para sincronizar tus datos.</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">URL del Apps Script</label>
+      <input class="form-input" id="setup-url" type="url" placeholder="https://script.google.com/macros/s/...">
+    </div>
+    <button class="btn-primary" onclick="saveScriptUrl()">Conectar</button>
+    <button class="btn-secondary" onclick="closeSetup()" style="width:100%;margin-top:10px">Usar sin sincronizar</button>
+  </div>
+</div>
+
+<script>
+const COLORS = ['#378ADD','#1D9E75','#D85A30','#D4537E','#BA7517','#639922','#7F77DD','#888780'];
+const CAT_EMOJI = {alimentacion:'🛒',restaurantes:'🍽️',transporte:'🚗',entretenimiento:'🎬',salud:'🏥',ropa:'👔',servicios:'💡',educacion:'📚',viajes:'✈️',salario:'💼',freelance:'💻',otro:'📦'};
+
+let SCRIPT_URL = localStorage.getItem('finanzas-script-url') || '';
+let state = { transactions: [], cards: [], paid: [] };
+let currentType = 'expense';
+let activeFilter = 'all';
+let syncing = false;
+
+// ── Boot ────────────────────────────────────────────────────
+window.onload = () => {
+  document.getElementById('f-date').value = new Date().toISOString().split('T')[0];
+  initColorPicker();
+  if (!SCRIPT_URL) {
+    document.getElementById('setup-modal').classList.add('open');
+  } else {
+    syncData();
+  }
+};
+
+function saveScriptUrl() {
+  const url = document.getElementById('setup-url').value.trim();
+  if (url) { SCRIPT_URL = url; localStorage.setItem('finanzas-script-url', url); }
+  closeSetup();
+  if (SCRIPT_URL) syncData();
+}
+
+function closeSetup() { document.getElementById('setup-modal').classList.remove('open'); render(); }
+
+// ── Sync ────────────────────────────────────────────────────
+async function syncData() {
+  if (!SCRIPT_URL || syncing) return;
+  syncing = true;
+  setSyncState('loading', 'Sincronizando...');
+  try {
+    const res = await fetch(SCRIPT_URL + '?action=getAll');
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    state.transactions = (data.transactions || []).map(t => ({
+      id: t.id, type: t.tipo, account: t.cuenta,
+      description: t.descripcion, amount: parseFloat(t.monto),
+      date: t.fecha ? String(t.fecha).split('T')[0] : '',
+      category: t.categoria, notes: t.notas
+    }));
+    state.cards = (data.cards || []).map(c => ({
+      id: c.id, name: c.nombre, cutDay: parseInt(c.diaCorte),
+      payDay: parseInt(c.diaPago), limit: parseFloat(c.limite), color: c.color
+    }));
+    state.paid = (data.paid || []).map(p => ({ cardId: p.cardId, payKey: p.payKey }));
+    setSyncState('ok', 'Sincronizado');
+  } catch(e) {
+    setSyncState('err', 'Error sync');
+  }
+  syncing = false;
+  render();
+}
+
+async function api(params) {
+  if (!SCRIPT_URL) return { error: 'Sin URL' };
+  try {
+    const res = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify(params)
+    });
+    return await res.json();
+  } catch(e) { return { error: e.toString() }; }
+}
+
+function setSyncState(st, label) {
+  const dot = document.getElementById('sync-dot');
+  const lbl = document.getElementById('sync-label');
+  dot.className = 'sync-dot' + (st === 'err' ? ' err' : st === 'loading' ? ' loading' : '');
+  lbl.textContent = label;
+}
+
+// ── UI ──────────────────────────────────────────────────────
+function showTab(id, idx) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('section-' + id).classList.add('active');
+  document.getElementById('tab' + idx).classList.add('active');
+  if (id === 'dashboard') renderDashboard();
+  if (id === 'transactions') renderTransactions();
+  if (id === 'cards') renderCards();
+  if (id === 'add') updateAccountOpts();
+}
+
+function render() {
+  renderDashboard();
+  renderTransactions();
+  renderCards();
+  updateAccountOpts();
+}
+
+function fmt(n) { return '$' + Math.abs(Number(n)).toLocaleString('es-MX', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+function dateStr(d) { return d.toISOString().split('T')[0]; }
+
+function getCardBalances(card) {
+  const today = new Date();
+  const tStr = dateStr(today);
+  let lastCut = new Date(today.getFullYear(), today.getMonth(), card.cutDay);
+  if (today < lastCut) lastCut = new Date(today.getFullYear(), today.getMonth() - 1, card.cutDay);
+  const lcStr = dateStr(lastCut);
+  let payDate = new Date(lastCut.getFullYear(), lastCut.getMonth(), card.payDay);
+  if (payDate <= lastCut) payDate = new Date(lastCut.getFullYear(), lastCut.getMonth() + 1, card.payDay);
+  const payKey = lcStr.substring(0,7);
+  const isPaid = state.paid.some(p => p.cardId === card.id && p.payKey === payKey);
+  const txCard = state.transactions.filter(t => t.account === card.id && t.type === 'expense');
+  const atCut = txCard.filter(t => t.date <= lcStr).reduce((s,t) => s + Number(t.amount), 0);
+  const afterCut = txCard.filter(t => t.date > lcStr).reduce((s,t) => s + Number(t.amount), 0);
+  const cutBalance = isPaid ? 0 : atCut;
+  return { cutBalance, afterCut, total: cutBalance + afterCut, lcStr, payDateStr: dateStr(payDate), isPaid, payKey };
+}
+
+function renderDashboard() {
+  const txs = state.transactions;
+  const cashBal = txs.filter(t=>t.account==='cash').reduce((s,t)=>t.type==='income'?s+Number(t.amount):s-Number(t.amount),0);
+  const tdcTotal = state.cards.reduce((s,c)=>s+getCardBalances(c).total,0);
+  const incomeTot = txs.filter(t=>t.type==='income').reduce((s,t)=>s+Number(t.amount),0);
+
+  document.getElementById('dash-metrics').innerHTML = `
+    <div class="metric"><div class="metric-label">Efectivo</div><div class="metric-value ${cashBal<0?'red':''}">${fmt(cashBal)}</div><div class="metric-sub">Ingresos: ${fmt(incomeTot)}</div></div>
+    <div class="metric"><div class="metric-label">Deuda TDC</div><div class="metric-value red">${fmt(tdcTotal)}</div><div class="metric-sub">${state.cards.length} tarjeta(s)</div></div>
+  `;
+
+  document.getElementById('tdc-cards-dash').innerHTML = state.cards.map(c => {
+    const b = getCardBalances(c);
+    const pct = Math.min(100, (b.total / (c.limit||10000)) * 100);
+    const barColor = pct > 80 ? 'var(--red)' : pct > 50 ? 'var(--amber)' : 'var(--green)';
+    return `<div class="tdc-card">
+      <div class="tdc-header">
+        <div class="tdc-name"><span class="tdc-dot" style="background:${c.color}"></span>${c.name}</div>
+        <div style="display:flex;gap:6px;align-items:center">
+          ${b.isPaid ? '<span class="badge badge-green">Pagado ✓</span>' : '<span class="badge badge-amber">Pendiente</span>'}
+          ${!b.isPaid && b.cutBalance > 0 ? `<button class="pay-btn" onclick="markPaid('${c.id}','${b.payKey}')">Pagar</button>` : ''}
+        </div>
+      </div>
+      <div class="tdc-dates-row">Corte: día ${c.cutDay} · Pago: día ${c.payDay} · Límite: ${fmt(c.limit)} · Próx. pago: ${b.payDateStr}</div>
+      <div class="tdc-balances">
+        <div class="tdc-bal-box"><div class="tdc-bal-label">Al corte (${b.lcStr})</div><div class="tdc-bal-val ${b.cutBalance>0?'red':''}">${fmt(b.cutBalance)}</div></div>
+        <div class="tdc-bal-box"><div class="tdc-bal-label">Desde el corte</div><div class="tdc-bal-val ${b.afterCut>0?'red':''}">${fmt(b.afterCut)}</div></div>
+      </div>
+      <div class="tdc-footer">
+        <div class="progress"><div class="progress-fill" style="width:${pct.toFixed(1)}%;background:${barColor}"></div></div>
+        <span style="font-size:12px;color:var(--text3);font-family:'DM Mono',monospace">${fmt(b.total)} / ${fmt(c.limit)}</span>
+      </div>
+    </div>`;
+  }).join('') || '<div class="empty">Sin tarjetas registradas</div>';
+
+  const recent = [...txs].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5);
+  document.getElementById('dash-recent').innerHTML = recent.length
+    ? recent.map(t => txHTML(t)).join('')
+    : '<div class="empty">Sin movimientos aún</div>';
+}
+
+function txHTML(t) {
+  const isExp = t.type === 'expense';
+  const acct = t.account === 'cash' ? 'Efectivo' : (state.cards.find(c=>c.id===t.account)||{}).name || t.account;
+  return `<div class="tx-item">
+    <div class="tx-icon ${isExp?'out':'in'}">${CAT_EMOJI[t.category]||'📦'}</div>
+    <div class="tx-info">
+      <div class="tx-desc">${t.description}</div>
+      <div class="tx-meta">${t.date} · ${acct}</div>
+    </div>
+    <div class="tx-right">
+      <div class="tx-amount ${isExp?'neg':'pos'}">${isExp?'−':'+'}${fmt(t.amount)}</div>
+      <button class="del-btn" onclick="deleteTx('${t.id}')">🗑</button>
+    </div>
+  </div>`;
+}
+
+function renderTransactions() {
+  const bar = document.getElementById('filter-bar');
+  const filters = [{k:'all',l:'Todo'},{k:'income',l:'💰 Ingresos'},{k:'expense',l:'💸 Gastos'},{k:'cash',l:'Efectivo'}, ...state.cards.map(c=>({k:c.id,l:c.name}))];
+  bar.innerHTML = filters.map(f=>`<button class="filter-chip ${activeFilter===f.k?'active':''}" onclick="setFilter('${f.k}')">${f.l}</button>`).join('');
+
+  let txs = [...state.transactions].sort((a,b)=>b.date.localeCompare(a.date));
+  if (activeFilter==='income') txs=txs.filter(t=>t.type==='income');
+  else if (activeFilter==='expense') txs=txs.filter(t=>t.type==='expense');
+  else if (activeFilter!=='all') txs=txs.filter(t=>t.account===activeFilter);
+
+  document.getElementById('tx-list').innerHTML = txs.length
+    ? txs.map(t=>txHTML(t)).join('')
+    : '<div class="empty">Sin movimientos</div>';
+}
+
+function setFilter(k) { activeFilter=k; renderTransactions(); }
+
+function renderCards() {
+  document.getElementById('cards-list').innerHTML = state.cards.map(c => {
+    const b = getCardBalances(c);
+    return `<div class="card" style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div style="display:flex;align-items:center;gap:8px"><span class="tdc-dot" style="background:${c.color}"></span><strong>${c.name}</strong></div>
+        <button class="btn-danger-sm" onclick="deleteCard('${c.id}')">Eliminar</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px">
+        <div style="color:var(--text3)">Día corte</div><div style="text-align:right;font-weight:500">Día ${c.cutDay}</div>
+        <div style="color:var(--text3)">Día pago</div><div style="text-align:right;font-weight:500">Día ${c.payDay}</div>
+        <div style="color:var(--text3)">Límite</div><div style="text-align:right;font-family:'DM Mono',monospace">${fmt(c.limit)}</div>
+        <div style="color:var(--text3)">Saldo al corte</div><div style="text-align:right;font-family:'DM Mono',monospace;color:${b.cutBalance>0?'var(--red)':'var(--green)'}">${fmt(b.cutBalance)}</div>
+        <div style="color:var(--text3)">Total actual</div><div style="text-align:right;font-family:'DM Mono',monospace;color:${b.total>0?'var(--red)':'var(--green)'}">${fmt(b.total)}</div>
+        <div style="color:var(--text3)">Estado</div><div style="text-align:right">${b.isPaid?'<span class="badge badge-green">Pagado</span>':'<span class="badge badge-amber">Pendiente</span>'}</div>
+      </div>
+      ${!b.isPaid && b.cutBalance > 0 ? `<button class="btn-primary" onclick="markPaid('${c.id}','${b.payKey}')" style="margin-top:12px">Marcar como pagado</button>` : ''}
+    </div>`;
+  }).join('') || '<div class="empty">Sin tarjetas registradas</div>';
+}
+
+function updateAccountOpts() {
+  const sel = document.getElementById('f-account');
+  const opts = [{v:'cash',l:'Efectivo'}];
+  if (currentType==='expense') state.cards.forEach(c=>opts.push({v:c.id,l:c.name}));
+  sel.innerHTML = opts.map(o=>`<option value="${o.v}">${o.l}</option>`).join('');
+}
+
+function setType(t) {
+  currentType = t;
+  document.getElementById('type-expense').classList.toggle('active', t==='expense');
+  document.getElementById('type-income').classList.toggle('active', t==='income');
+  updateAccountOpts();
+}
+
+async function addTx() {
+  const desc = document.getElementById('f-desc').value.trim();
+  const amount = parseFloat(document.getElementById('f-amount').value);
+  const date = document.getElementById('f-date').value;
+  const account = document.getElementById('f-account').value;
+  const category = document.getElementById('f-category').value;
+  const notes = document.getElementById('f-notes').value.trim();
+  if (!desc || !amount || amount <= 0 || !date) { alert('Completa descripción, monto y fecha.'); return; }
+
+  const tx = { id: Date.now().toString(), type: currentType, account, description: desc, amount, date, category, notes };
+
+  if (SCRIPT_URL) {
+    setSyncState('loading', 'Guardando...');
+    const r = await api({ action:'addTx', type:currentType, account, description:desc, amount, date, category, notes });
+    if (r.id) tx.id = r.id;
+    setSyncState('ok', 'Sincronizado');
+  }
+
+  state.transactions.push(tx);
+  document.getElementById('f-desc').value = '';
+  document.getElementById('f-amount').value = '';
+  document.getElementById('f-notes').value = '';
+  updateAccountOpts();
+  showTab('dashboard', 0);
+}
+
+async function deleteTx(id) {
+  if (!confirm('¿Eliminar este movimiento?')) return;
+  if (SCRIPT_URL) { setSyncState('loading','Eliminando...'); await api({action:'deleteTx',id}); setSyncState('ok','Sincronizado'); }
+  state.transactions = state.transactions.filter(t=>t.id!==id);
+  render();
+}
+
+async function markPaid(cardId, payKey) {
+  if (SCRIPT_URL) { setSyncState('loading','Guardando...'); await api({action:'markPaid',cardId,payKey}); setSyncState('ok','Sincronizado'); }
+  state.paid.push({ cardId, payKey });
+  render();
+}
+
+function openCardModal() { document.getElementById('card-modal').classList.add('open'); }
+function closeCardModal() { document.getElementById('card-modal').classList.remove('open'); }
+
+async function saveCard() {
+  const name = document.getElementById('nc-name').value.trim();
+  const cutDay = parseInt(document.getElementById('nc-cut').value);
+  const payDay = parseInt(document.getElementById('nc-pay').value);
+  const limit = parseFloat(document.getElementById('nc-limit').value) || 0;
+  const color = document.getElementById('nc-color').value;
+  if (!name || !cutDay || !payDay) { alert('Completa todos los campos.'); return; }
+
+  let id = 'card_' + Date.now();
+  if (SCRIPT_URL) {
+    setSyncState('loading','Guardando...');
+    const r = await api({action:'addCard', name, cutDay, payDay, limit, color});
+    if (r.id) id = r.id;
+    setSyncState('ok','Sincronizado');
+  }
+  state.cards.push({id, name, cutDay, payDay, limit, color});
+  closeCardModal();
+  render();
+}
+
+async function deleteCard(id) {
+  if (!confirm('¿Eliminar esta tarjeta y sus movimientos?')) return;
+  if (SCRIPT_URL) { setSyncState('loading','Eliminando...'); await api({action:'deleteCard',id}); setSyncState('ok','Sincronizado'); }
+  state.cards = state.cards.filter(c=>c.id!==id);
+  state.transactions = state.transactions.filter(t=>t.account!==id);
+  render();
+}
+
+function initColorPicker() {
+  const el = document.getElementById('color-picker');
+  el.innerHTML = COLORS.map((c,i) =>
+    `<div class="color-swatch ${i===0?'selected':''}" style="background:${c}" onclick="pickColor('${c}',this)"></div>`
+  ).join('');
+}
+
+function pickColor(c, el) {
+  document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('nc-color').value = c;
+}
+
+document.getElementById('card-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('card-modal')) closeCardModal();
+});
+</script>
+</body>
+</html>
